@@ -51,6 +51,7 @@ def load(db_path: Path, rows: list[tuple[str, str, int, float, str]]):
             """
         )
         cur.execute("DELETE FROM raw")
+
         cur.executemany(
             """
             INSERT INTO raw (id, title, publication_year, price, currency)
@@ -58,7 +59,7 @@ def load(db_path: Path, rows: list[tuple[str, str, int, float, str]]):
             """,
             rows,
         )
-        
+
         cur.execute("DROP TABLE IF EXISTS summary")
         cur.execute(
             """
@@ -82,14 +83,6 @@ def load(db_path: Path, rows: list[tuple[str, str, int, float, str]]):
         )
         conn.commit()
         
-        # conn.cursor().execute("SELECT COUNT(*) FROM books_raw")
-        # raw_count = conn.cursor().fetchone()[0]
-        # conn.cursor().execute("SELECT COUNT(*) FROM books_summary")
-        # summary_count = conn.cursor().fetchone()[0]
-
-        # print(f"books_raw rows: {raw_count}")
-        # print(f"books_summary rows: {summary_count}")
-
     finally:
         conn.close()
 
