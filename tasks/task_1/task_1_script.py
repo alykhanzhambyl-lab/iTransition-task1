@@ -25,11 +25,11 @@ def extract(path: Path) -> list[tuple[str, str, int, float, str]]:
         price_str = str(item["price"])
         currency = price_str[0]
 
-        m = re.search(r'(\d+)', price_str)
+        m = re.search(r"\d+(\.\d+)?", price_str)
         if not m:
             raise ValueError(f"Cannot parse price from: {price_str!r}")
         
-        price = float(m.group(1))  
+        price = float(m.group(0))  
         rows.append((book_id, title, year, price, currency))
 
     return rows
