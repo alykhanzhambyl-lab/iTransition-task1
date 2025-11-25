@@ -1,0 +1,35 @@
+# === Python cache ===
+__pycache__/
+*.py[cod]
+*$py.class
+
+# === Виртуальные окружения ===
+.venv/
+venv/
+env/
+ENV/
+
+# === Логи и временные файлы ===
+*.log
+*.tmp
+
+# === Тесты ===
+.pytest_cache/
+.coverage
+htmlcov/
+
+# === IDE / редакторы ===
+.vscode/
+.idea/
+*.swp
+
+# === Jupyter ===
+.ipynb_checkpoints/
+
+# === Секреты и конфиги ===
+.env
+.env.*
+
+# === Mac / Windows служебные ===
+.DS_Store
+Thumbs.db
