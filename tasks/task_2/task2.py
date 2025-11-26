@@ -13,14 +13,15 @@ for f in dir.iterdir():
     hashes.append((k,h))
 hashes.sort()
 
-# s = email + "".join(h for k,h in hashes)
-res = hashlib.sha3_256((email + "".join(h for k,h in hashes)).encode("utf-8")).hexdigest()
-
+res = hashlib.sha3_256((("".join(h for k,h in hashes) + email)).encode("utf-8")).hexdigest()
 print(res)
 
-# for i in hashes:
-#     print(f'{i}\n')
-    
+
+# for i in hashes: print(f'{i}\n')
+
+# print(hashes)
+# s = ("".join(h for k,h in hashes)) + email
+# print(s)
 
 # h = dir / "file_00.data"
 # h = hashlib.sha3_256(h.read_bytes()).hexdigest()
