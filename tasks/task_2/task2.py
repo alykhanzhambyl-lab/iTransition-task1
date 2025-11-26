@@ -13,7 +13,7 @@ for f in dir.iterdir():
     hashes.append((k,h))
 hashes.sort()
 
-s = email + "".join(h for k,h in hashes)
+# s = email + "".join(h for k,h in hashes)
 res = hashlib.sha3_256((email + "".join(h for k,h in hashes)).encode("utf-8")).hexdigest()
 
 print(res)
