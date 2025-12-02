@@ -6,7 +6,7 @@ from datetime import datetime
 from dateutil import parser
 from orders import clean_orders_df
 from users import clean_users_df
-from revenue_m import ext_date, any_price_to_usd
+from revenue_m import ext_date, any_price_to_usd, paid_price_func, top5_days
 
 
 books_path = r"C:\iTransition\tasks\task_4\data\DATA1\books.yaml"
@@ -21,11 +21,17 @@ books_raw_df = pd.DataFrame(data_books)
 
 def main():
     orders_df = clean_orders_df(orders_raw_df)
+    orders_df = ext_date(orders_df)
     orders_df = any_price_to_usd(orders_df)
+    orders_df = paid_price_func(orders_df)
+    top5_days(orders_df)
+    
 
-    # users_df = clean_users_df(users_raw_df)
-    # orders_df = any_price_to_dollar(orders_df)
-    # orders_df = ext_date(orders_df)
+    # orders_df = paid_price_func(orders_df)
+
+    # # users_df = clean_users_df(users_raw_df)
+    # # orders_df = any_price_to_dollar(orders_df)
+    
     orders_df.to_csv("orders_clean.csv", index=False)
     # # users_df.to_csv("users_clean.csv", index=False)
 
