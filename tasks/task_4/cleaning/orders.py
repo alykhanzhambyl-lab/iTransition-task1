@@ -1,35 +1,27 @@
 import re
 import pandas as pd
-from timestamp import parse_timestamp
-from patterns import pattrns
+from cleaning.timestamp import parse_timestamp
+from cleaning.patterns import pattrns
 
 def cents(price):
     price = re.sub(r"(\d+)\s*¢\s*(\d+)", r"\1.\2", price)
     price = re.sub(r"(\d+)\s*[$€]\s*(\d+)\s*¢", r"\1.\2", price)
     return price
-    
-
 def currencies(price):
     price = price.upper()
     if "EUR" in price or "€" in price: currency = "€"
     elif "USD" in price or "$" in price: currency = "$"
     else: currency = "$"
     return currency
-
-
 def delete_currency(price):
     price = re.sub(r"(?i)\b(?:USD|EUR)\b|[$€]", "", price).strip()
     return price
-
-
 def number_extract(price):
     x = re.search(r"\d+(?:[.,]\d*)?", price)
     if not x: return None
     num = x.group(0).replace(",", ".")
     if num.endswith("."): num = num[:-1]
     return f"{num}"
-
-
 def unit_price_norm(x):
     if pd.isna(x): return None
     price = str(x).strip()
@@ -41,10 +33,8 @@ def unit_price_norm(x):
         return None
     return f"{num} {currency}"
 
-
 def shipping_norm(s):
     return s.astype(str).str.strip().str.lower().replace(r"^\s*$", pd.NA, regex=True)
-
 
 def clean_orders_df(orders_raw_df):
     df = orders_raw_df.copy()

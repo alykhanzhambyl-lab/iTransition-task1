@@ -1,9 +1,8 @@
 import re
 from datetime import datetime
-from patterns import pattrns
+from cleaning.patterns import pattrns
 import pandas as pd
 from dateutil import parser
-
 
 def normalize_timestamp(txt) -> str:
     s = str(txt).strip()
