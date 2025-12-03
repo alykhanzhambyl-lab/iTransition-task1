@@ -143,7 +143,6 @@
     let revenueChart = null;
 
     async function loadAllData() {
-      // грузим json'ы для каждого датасета
       for (const label of DATASETS) {
         try {
           const [mResp, rResp] = await Promise.all([
@@ -175,8 +174,6 @@
         alert("Не удалось загрузить ни один датасет. Проверить, что metrics_*.json и daily_revenue_*.json лежат в папке dashboard.");
         return;
       }
-
-      // отключим варианты без данных
       for (const option of Array.from(selector.options)) {
         if (!allMetrics[option.value]) {
           option.disabled = true;
@@ -199,8 +196,6 @@
       const dailyRevenue = allRevenue[label];
 
       console.log(`Rendering dashboard for ${label}`, metrics, dailyRevenue);
-
-      // KPI
       document.getElementById("kpi-users").textContent = metrics.n_real_users;
       document.getElementById("kpi-author-sets").textContent = metrics.n_author_sets;
       document.getElementById("kpi-best-author").textContent =
@@ -227,7 +222,6 @@
           top5Ul.appendChild(li);
         });
 
-      // График: защищаемся, если Chart.js не загрузился
       const labels = dailyRevenue.map(r => r.date);
       const values = dailyRevenue.map(r => r.daily_revenue);
 
