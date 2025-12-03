@@ -6,9 +6,9 @@ from datetime import datetime
 from dateutil import parser
 from cleaning.orders import clean_orders_df
 from cleaning.users import clean_users_df
-from books_m import ext_date, any_price_to_usd, paid_price_func, top5_days
-from users_real_best_m import realy_real_users, user_id_in_orders, best_buyer_metrics, plot_daily_revenue
-from authors_rev_best_m import col_authors_to_str, count_unique_author_sets, most_popular_author_set
+from reviews.books_m import ext_date, any_price_to_usd, paid_price_func, top5_days
+from reviews.users_real_best_m import realy_real_users, user_id_in_orders, best_buyer_metrics, plot_daily_revenue
+from reviews.authors_rev_best_m import col_authors_to_str, count_unique_author_sets, most_popular_author_set
 
 
 # from processing import process_orders
@@ -33,30 +33,35 @@ def run(orders_raw_df, users_raw_df, books_raw_df, label = "DATA1"):
     users_df, n_real_users, user_to_real = realy_real_users(users_df, id_col="id")
     orders_df = user_id_in_orders(orders_df,user_to_real=user_to_real,id_col="user_id",real_user_col="real_user_id",)
 
-    best_real_user_id, best_total_spent, best_user_ids = best_buyer_metrics(orders_df,users_df, real_col="real_user_id",paid_col="paid_price",users_id_col="id",)
-    books_df = col_authors_to_str(books_raw_df,authors_name_col="author",authors_name_norm="author_norm")
+    best_real_user_id, best_total_spent, best_user_ids = best_buyer_metrics(orders_df,users_df, real_col="real_user_id",paid_col="paid_price",users_id_col="id")
+    best_users_rows = users_df[users_df["id"].isin(best_user_ids)]
+    name_col = "name_norm" if "name_norm" in best_users_rows.columns else "name"
+    best_buyer_name =(best_users_rows[name_col].dropna().astype(str).iloc[0]
+    if not best_users_rows.empty
+        else None
+    )
+
+    # все варианты имён по алиасам
+    best_buyer_all_names = best_users_rows[name_col].dropna().astype(str).unique().tolist()
+    
+    books_df = col_authors_to_str(books_raw_df,authors_name_col=":author",authors_name_norm="author_norm")
+    books_df = books_df.rename(columns={":id": "id"})
 
     n_author = count_unique_author_sets(books_df,author_norm_col="author_norm")
 
     best_author_set, best_sold_count = most_popular_author_set(
-        orders_df,
-        books_df,
-        book_id_col="book_id",
-        qty_col="quantity",
-        author_set_col="author_set",       
-    )
-    plot_daily_revenue(
-        orders_df,
-        date_col="date",
-        paid_col="paid_price",
-        title=f"Daily revenue ({label})",
-    )
+        orders_df,books_df,order_book_id_col="book_id",
+        book_id_col="id",qty_col="quantity",author_norm_col="author_norm")
+    
+    daily_revenue = plot_daily_revenue(orders_df,date_col="date",paid_col="paid_price",title=f"Daily revenue ({label})")
 
     metrics = {
         "label": label,
         "top5_days": top5,
         "n_real_users": int(n_real_users),
         "best_buyer_id": best_user_ids,
+        "best_buyer_name": best_buyer_name,
+        "best_buyer_all_names": best_buyer_all_names,
         "best_buyer_total_spent": best_total_spent,
         "n_author_sets": int(n_author),
         "best_author": best_author_set,
@@ -74,8 +79,31 @@ def main():
     orders_raw_df = pd.read_parquet(r"C:\iTransition\tasks\task_4\data\DATA1\orders.parquet")
     books_raw_df = pd.DataFrame(data_books)
 
+    # print(books_raw_df.columns.tolist())
+    # print(books_raw_df.head())
+
+
     order_1_data, users_1_data, books_1_data, metric_1 = run(orders_raw_df, users_raw_df, books_raw_df, label="DATA1")
-    print(metric_1)
+    def pretty_print_metrics(m: dict):
+        print("\nРезультаты:", m["label"], "\n")
+        print("Топ-5 дней по выручке:")
+        for d, rev in m["top5_days"][0].items():
+            print(f"   • {d.strftime('%Y-%m-%d')}: {rev:.2f} USD")
+        print(f"\nКоличество реальных пользователей: {m['n_real_users']}")
+        print(f"\nКоличество уникальных сетов авторов: {m['n_author_sets']}")
+        print("\nСамый популярный набор авторов:")
+        print("   ", ", ".join(m["best_author"]))
+        print(f"\nВыручка по этому автору: {m['best_author_set_sold']}")
+        print("\nЛучший покупатель:")
+        print(f"   user_ids: {m['best_buyer_id']}")
+        print(f"   total spent: {m['best_buyer_total_spent']}\n")
+        if m.get("best_buyer_name"):
+            print(f"   main name: {m['best_buyer_name']}")
+        if m.get("best_buyer_all_names"):
+            print(f"   all names: {m['best_buyer_all_names']}")
+    
+    pretty_print_metrics(metric_1)
+
 
 
 if __name__ == "__main__":
