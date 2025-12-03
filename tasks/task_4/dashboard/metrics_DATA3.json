@@ -1,0 +1,43 @@
+{
+  "label": "DATA3",
+  "top5_days": [
+    {
+      "date": "2024-11-16",
+      "revenue": 3688.192
+    },
+    {
+      "date": "2025-01-31",
+      "revenue": 3341.98
+    },
+    {
+      "date": "2024-10-26",
+      "revenue": 3127.92
+    },
+    {
+      "date": "2024-11-12",
+      "revenue": 3034.54
+    },
+    {
+      "date": "2024-11-01",
+      "revenue": 2954.02
+    }
+  ],
+  "n_real_users": 3290,
+  "n_author_sets": 268,
+  "best_author": [
+    "Coy Streich",
+    "Keeley Hand",
+    "Lela Emard"
+  ],
+  "best_author_set_sold": 159.0,
+  "best_buyer_id": [
+    49715,
+    50963
+  ],
+  "best_buyer_total_spent": 1207.48,
+  "best_buyer_name": "Tony Sawayn",
+  "best_buyer_all_names": [
+    "Tony Sawayn",
+    "Long Bogisich IV"
+  ]
+}

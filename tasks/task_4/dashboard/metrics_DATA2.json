@@ -1,0 +1,44 @@
+{
+  "label": "DATA2",
+  "top5_days": [
+    {
+      "date": "2024-09-12",
+      "revenue": 4048.848
+    },
+    {
+      "date": "2024-11-15",
+      "revenue": 3677.17
+    },
+    {
+      "date": "2024-11-21",
+      "revenue": 3581.932
+    },
+    {
+      "date": "2024-12-25",
+      "revenue": 3572.11
+    },
+    {
+      "date": "2025-01-20",
+      "revenue": 3561.5
+    }
+  ],
+  "n_real_users": 2663,
+  "n_author_sets": 293,
+  "best_author": [
+    "Hershel Treutel",
+    "Miss Modesto Denesik",
+    "Sen. Trula Bosco"
+  ],
+  "best_author_set_sold": 163.0,
+  "best_buyer_id": [
+    53583,
+    55058,
+    55420
+  ],
+  "best_buyer_total_spent": 1312.8319999999999,
+  "best_buyer_name": "Catina Altenwerth",
+  "best_buyer_all_names": [
+    "Catina Altenwerth",
+    "Tilda Hartmann"
+  ]
+}

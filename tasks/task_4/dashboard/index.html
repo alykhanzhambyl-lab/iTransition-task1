@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Orders & Books Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #111827;
+      color: #e5e7eb;
+    }
+    header {
+      padding: 16px 24px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .dataset-select {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #d1d5db;
+    }
+    .dataset-select select {
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 6px;
+      border: 1px solid #4b5563;
+      padding: 4px 8px;
+    }
+    .container {
+      padding: 16px 24px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .kpi-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi-card {
+      flex: 1 1 220px;
+      background: #020617;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid #1f2937;
+    }
+    .kpi-label {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .kpi-value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    h2 {
+      margin-top: 24px;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    ul {
+      margin-top: 4px;
+      padding-left: 18px;
+    }
+    li {
+      margin-bottom: 2px;
+    }
+    canvas {
+      background: #020617;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      padding: 8px;
+    }
+    .small {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Orders & Books Dashboard</h1>
+    <div class="dataset-select">
+      <span>Dataset:</span>
+      <select id="dataset-selector">
+        <option value="DATA1">DATA1</option>
+        <option value="DATA2">DATA2</option>
+        <option value="DATA3">DATA3</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Real users</div>
+        <div class="kpi-value" id="kpi-users">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Unique author sets</div>
+        <div class="kpi-value" id="kpi-author-sets">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Best author(s)</div>
+        <div class="kpi-value" id="kpi-best-author">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Best buyer IDs</div>
+        <div class="kpi-value" id="kpi-best-buyer-ids">–</div>
+        <div class="small" id="kpi-best-buyer-name"></div>
+      </div>
+    </div>
+
+    <h2>Top 5 days by revenue</h2>
+    <ul id="top5-list"></ul>
+
+    <h2>Daily revenue</h2>
+    <canvas id="dailyRevenueChart" height="120"></canvas>
+
+    <p class="small">
+      Data source: DATA1 / DATA2 / DATA3 (orders, users, books) processed in task_4 pipeline.
+    </p>
+  </div>
+
+  <script>
+    const DATASETS = ["DATA1", "DATA2", "DATA3"];
+
+    const allMetrics = {};
+    const allRevenue = {};
+    let revenueChart = null;
+
+    async function loadAllData() {
+      // грузим json'ы для каждого датасета
+      for (const label of DATASETS) {
+        try {
+          const [mResp, rResp] = await Promise.all([
+            fetch(`metrics_${label}.json`),
+            fetch(`daily_revenue_${label}.json`),
+          ]);
+
+          if (!mResp.ok || !rResp.ok) {
+            console.warn(`No data for ${label}: HTTP ${mResp.status}/${rResp.status}`);
+            continue;
+          }
+
+          const metrics = await mResp.json();
+          const revenue = await rResp.json();
+
+          console.log(`Loaded data for ${label}`, metrics, revenue);
+
+          allMetrics[label] = metrics;
+          allRevenue[label] = revenue;
+        } catch (err) {
+          console.error(`Failed to load data for ${label}:`, err);
+        }
+      }
+
+      const selector = document.getElementById("dataset-selector");
+      const available = DATASETS.filter(l => allMetrics[l]);
+
+      if (available.length === 0) {
+        alert("Не удалось загрузить ни один датасет. Проверить, что metrics_*.json и daily_revenue_*.json лежат в папке dashboard.");
+        return;
+      }
+
+      // отключим варианты без данных
+      for (const option of Array.from(selector.options)) {
+        if (!allMetrics[option.value]) {
+          option.disabled = true;
+        }
+      }
+
+      selector.value = available[0];
+      renderDashboard(available[0]);
+
+      selector.addEventListener("change", () => {
+        const label = selector.value;
+        if (allMetrics[label]) {
+          renderDashboard(label);
+        }
+      });
+    }
+
+    function renderDashboard(label) {
+      const metrics = allMetrics[label];
+      const dailyRevenue = allRevenue[label];
+
+      console.log(`Rendering dashboard for ${label}`, metrics, dailyRevenue);
+
+      // KPI
+      document.getElementById("kpi-users").textContent = metrics.n_real_users;
+      document.getElementById("kpi-author-sets").textContent = metrics.n_author_sets;
+      document.getElementById("kpi-best-author").textContent =
+        metrics.best_author && metrics.best_author.length
+          ? metrics.best_author.join(", ")
+          : "—";
+
+      document.getElementById("kpi-best-buyer-ids").textContent =
+        "[" + metrics.best_buyer_id.join(", ") + "]";
+      const buyerNameEl = document.getElementById("kpi-best-buyer-name");
+      buyerNameEl.textContent = metrics.best_buyer_name
+        ? `Name: ${metrics.best_buyer_name}`
+        : "";
+
+      // Top-5
+      const top5Ul = document.getElementById("top5-list");
+      top5Ul.innerHTML = "";
+      metrics.top5_days
+        .slice()
+        .sort((a, b) => b.revenue - a.revenue)
+        .forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = `${item.date}: ${item.revenue.toFixed(2)} USD`;
+          top5Ul.appendChild(li);
+        });
+
+      // График: защищаемся, если Chart.js не загрузился
+      const labels = dailyRevenue.map(r => r.date);
+      const values = dailyRevenue.map(r => r.daily_revenue);
+
+      const canvas = document.getElementById("dailyRevenueChart");
+      const ctx = canvas.getContext("2d");
+
+      if (typeof Chart === "undefined") {
+        console.warn("Chart.js не загружен — график не будет отрисован.");
+        canvas.style.display = "none";
+        return;
+      }
+
+      if (revenueChart) {
+        revenueChart.destroy();
+      }
+
+      revenueChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: `Daily revenue (USD) — ${label}`,
+            data: values,
+            fill: false,
+            tension: 0.2,
+          }],
+        },
+        options: {
+          scales: {
+            x: { title: { display: true, text: "Date" } },
+            y: { title: { display: true, text: "Revenue, USD" } },
+          },
+        },
+      });
+    }
+
+    loadAllData();
+  </script>
+</body>
+</html>

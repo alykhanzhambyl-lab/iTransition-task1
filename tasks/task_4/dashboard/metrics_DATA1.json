@@ -1,0 +1,42 @@
+{
+  "label": "DATA1",
+  "top5_days": [
+    {
+      "date": "2025-01-02",
+      "revenue": 3997.068
+    },
+    {
+      "date": "2024-11-14",
+      "revenue": 3897.774
+    },
+    {
+      "date": "2024-09-06",
+      "revenue": 3746.118
+    },
+    {
+      "date": "2024-11-09",
+      "revenue": 3518.618
+    },
+    {
+      "date": "2024-10-07",
+      "revenue": 3517.018
+    }
+  ],
+  "n_real_users": 3115,
+  "n_author_sets": 325,
+  "best_author": [
+    "Arlinda Huel"
+  ],
+  "best_author_set_sold": 201.0,
+  "best_buyer_id": [
+    45062,
+    46955,
+    44850
+  ],
+  "best_buyer_total_spent": 1375.66,
+  "best_buyer_name": "Rev. Johnson Olson",
+  "best_buyer_all_names": [
+    "Rev. Johnson Olson",
+    "Yukiko Becker"
+  ]
+}
