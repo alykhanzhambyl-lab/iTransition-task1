@@ -13,3 +13,5 @@ __pycache__/
 *.csv
 *.yaml
 *.parquet
+
+/папки варианты
