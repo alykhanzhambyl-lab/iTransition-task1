@@ -7,46 +7,92 @@ from dateutil import parser
 from cleaning.orders import clean_orders_df
 from cleaning.users import clean_users_df
 from books_m import ext_date, any_price_to_usd, paid_price_func, top5_days
-from users_real_best_m import realy_real_users, user_id_in_orders, best_buyer_metrics
+from users_real_best_m import realy_real_users, user_id_in_orders, best_buyer_metrics, plot_daily_revenue
 from authors_rev_best_m import col_authors_to_str, count_unique_author_sets, most_popular_author_set
 
 
 # from processing import process_orders
 
-books_path = r"C:\iTransition\tasks\task_4\data\DATA1\books.yaml"
-with open(books_path ,encoding = "utf-8") as f:
-    data_books = yaml.safe_load(f)
+# books_path = r"C:\iTransition\tasks\task_4\data\DATA1\books.yaml"
+# with open(books_path ,encoding = "utf-8") as f:
+#     data_books = yaml.safe_load(f)
 
-users_raw_df = pd.read_csv(r"C:\iTransition\tasks\task_4\data\DATA1\users.csv", na_values=["NULL", "null", ""])
-orders_raw_df = pd.read_parquet(r"C:\iTransition\tasks\task_4\data\DATA1\orders.parquet")
-books_raw_df = pd.DataFrame(data_books)
+# users_raw_df = pd.read_csv(r"C:\iTransition\tasks\task_4\data\DATA1\users.csv", na_values=["NULL", "null", ""])
+# orders_raw_df = pd.read_parquet(r"C:\iTransition\tasks\task_4\data\DATA1\orders.parquet")
+# books_raw_df = pd.DataFrame(data_books)
 
 
+def run(orders_raw_df, users_raw_df, books_raw_df, label = "DATA1"):
+    orders_df = clean_orders_df(orders_raw_df)
+    orders_df = ext_date(orders_df)          
+    orders_df = any_price_to_usd(orders_df)  
+    orders_df = paid_price_func(orders_df)   
+    top5 = top5_days(orders_df)
+
+    users_df = clean_users_df(users_raw_df)
+    users_df, n_real_users, user_to_real = realy_real_users(users_df, id_col="id")
+    orders_df = user_id_in_orders(orders_df,user_to_real=user_to_real,id_col="user_id",real_user_col="real_user_id",)
+
+    best_real_user_id, best_total_spent, best_user_ids = best_buyer_metrics(orders_df,users_df, real_col="real_user_id",paid_col="paid_price",users_id_col="id",)
+    books_df = col_authors_to_str(books_raw_df,authors_name_col="author",authors_name_norm="author_norm")
+
+    n_author = count_unique_author_sets(books_df,author_norm_col="author_norm")
+
+    best_author_set, best_sold_count = most_popular_author_set(
+        orders_df,
+        books_df,
+        book_id_col="book_id",
+        qty_col="quantity",
+        author_set_col="author_set",       
+    )
+    plot_daily_revenue(
+        orders_df,
+        date_col="date",
+        paid_col="paid_price",
+        title=f"Daily revenue ({label})",
+    )
+
+    metrics = {
+        "label": label,
+        "top5_days": top5,
+        "n_real_users": int(n_real_users),
+        "best_buyer_id": best_user_ids,
+        "best_buyer_total_spent": best_total_spent,
+        "n_author_sets": int(n_author),
+        "best_author": best_author_set,
+        "best_author_set_sold": best_sold_count
+    }
+
+    return orders_df, users_df, books_df, metrics
 
 def main():
-    # orders_df = clean_orders_df(orders_raw_df) 
-    # orders_df = ext_date(orders_df)
-    # orders_df = any_price_to_usd(orders_df)
-    # orders_df = paid_price_func(orders_df)
-    # #print(top5_days(orders_df))
+    books_path = r"C:\iTransition\tasks\task_4\data\DATA1\books.yaml"
+    with open(books_path ,encoding = "utf-8") as f:
+        data_books = yaml.safe_load(f)
 
-    # users_df = clean_users_df(users_raw_df)
-    # users_df, n_real_users, user_to_real = realy_real_users(users_df)
-    # orders_df = user_id_in_orders(orders_df, user_to_real)
-    # best_real_user_id, best_total_spent, best_user_ids = best_buyer_metrics(orders_df,users_df,real_col="real_user_id",paid_col="paid_price",users_id_col="id")
+    users_raw_df = pd.read_csv(r"C:\iTransition\tasks\task_4\data\DATA1\users.csv", na_values=["NULL", "null", ""])
+    orders_raw_df = pd.read_parquet(r"C:\iTransition\tasks\task_4\data\DATA1\orders.parquet")
+    books_raw_df = pd.DataFrame(data_books)
 
-    # print("Реальных пользователей:", n_real_users)
-    # print("Лучший real_user_id:", best_real_user_id)
-    # print("Его траты:", best_total_spent)
-    # print("Его алиасы:", best_user_ids)
-    # print(top5_days(orders_df))
-
-    # # users_df.to_csv("users_clean.csv", index=False)
-
+    order_1_data, users_1_data, books_1_data, metric_1 = run(orders_raw_df, users_raw_df, books_raw_df, label="DATA1")
+    print(metric_1)
 
 
 if __name__ == "__main__":
     main()
+    
+
+
+
+
+
+
+
+
+
+
+
+
     
 
  # orders_df = ext_date(orders_df)

@@ -1,5 +1,5 @@
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 def realy_real_users( users_df, id_col: str = "id", matches: list | None = None):
     if matches is None: matches = ["name", "phone_norm", "email_norm"]
@@ -46,3 +46,7 @@ def best_buyer_metrics(
     best_total_spent = float(spending.loc[best_real_user_id])
     best_user_ids =users_df[users_df[real_col] == best_real_user_id][users_id_col].tolist()
     return best_real_user_id, best_total_spent, best_user_ids
+
+def plot_daily_revenue(orders_df, date_col = "date", paid_col: str = "paid_price",title = "Daily Revenue",):
+    daily_revenue = orders_df.groupby(date_col)[paid_col].sum().reset_index().rename(columns={paid_col: "daily_revenue"})    
+    plt.show()
