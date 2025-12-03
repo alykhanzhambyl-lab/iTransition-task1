@@ -4,10 +4,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from datetime import datetime
 from dateutil import parser
-from orders import clean_orders_df
-from users import clean_users_df
+from cleaning.orders import clean_orders_df
+from cleaning.users import clean_users_df
 from books_m import ext_date, any_price_to_usd, paid_price_func, top5_days
 from users_real_best_m import realy_real_users, user_id_in_orders, best_buyer_metrics
+from authors_rev_best_m import col_authors_to_str, count_unique_author_sets, most_popular_author_set
 
 
 # from processing import process_orders
