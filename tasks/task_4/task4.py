@@ -6,8 +6,8 @@ from datetime import datetime
 from dateutil import parser
 from orders import clean_orders_df
 from users import clean_users_df
-from revenue_m import ext_date, any_price_to_usd, paid_price_func, top5_days
-from users_m import realy_real_users, user_id_in_orders, best_buyer_metrics
+from books_m import ext_date, any_price_to_usd, paid_price_func, top5_days
+from users_real_best_m import realy_real_users, user_id_in_orders, best_buyer_metrics
 
 
 # from processing import process_orders
@@ -23,22 +23,22 @@ books_raw_df = pd.DataFrame(data_books)
 
 
 def main():
-    orders_df = clean_orders_df(orders_raw_df) 
-    orders_df = ext_date(orders_df)
-    orders_df = any_price_to_usd(orders_df)
-    orders_df = paid_price_func(orders_df)
-    #print(top5_days(orders_df))
+    # orders_df = clean_orders_df(orders_raw_df) 
+    # orders_df = ext_date(orders_df)
+    # orders_df = any_price_to_usd(orders_df)
+    # orders_df = paid_price_func(orders_df)
+    # #print(top5_days(orders_df))
 
-    users_df = clean_users_df(users_raw_df)
-    users_df, n_real_users, user_to_real = realy_real_users(users_df)
-    orders_df = user_id_in_orders(orders_df, user_to_real)
-    best_real_user_id, best_total_spent, best_user_ids = best_buyer_metrics(orders_df,users_df,real_col="real_user_id",paid_col="paid_price",users_id_col="id")
+    # users_df = clean_users_df(users_raw_df)
+    # users_df, n_real_users, user_to_real = realy_real_users(users_df)
+    # orders_df = user_id_in_orders(orders_df, user_to_real)
+    # best_real_user_id, best_total_spent, best_user_ids = best_buyer_metrics(orders_df,users_df,real_col="real_user_id",paid_col="paid_price",users_id_col="id")
 
-    print("Реальных пользователей:", n_real_users)
-    print("Лучший real_user_id:", best_real_user_id)
-    print("Его траты:", best_total_spent)
-    print("Его алиасы:", best_user_ids)
-    print(top5_days(orders_df))
+    # print("Реальных пользователей:", n_real_users)
+    # print("Лучший real_user_id:", best_real_user_id)
+    # print("Его траты:", best_total_spent)
+    # print("Его алиасы:", best_user_ids)
+    # print(top5_days(orders_df))
 
     # # users_df.to_csv("users_clean.csv", index=False)
 
